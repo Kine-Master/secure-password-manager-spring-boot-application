@@ -1,5 +1,5 @@
 Secure Password Manager Backend Spring Boot Application
-This repository contains the Spring Boot backend for the Secure Password Manager Web Application. It provides RESTful APIs for user authentication (local and OAuth2 with Google), authorization, and secure management of password entries.
+This repository contains the Spring Boot backend for the Secure Password Manager Spring Boot Application. It provides RESTful APIs for user authentication (local and OAuth2 with Google), authorization, and secure management of password entries.
 
 Table of Contents
 Technologies Used
