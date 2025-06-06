@@ -1,0 +1,76 @@
+// build.gradle
+
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17' // Explicitly set Java 17 compatibility
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral() // No need for Spring's milestone/snapshot repos with stable versions
+}
+
+dependencies {
+	// Spring Boot Starters for Web, Security, OAuth2, Thymeleaf, Actuator
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6' // Thymeleaf integration with Spring Security
+	implementation 'org.springframework.boot:spring-boot-starter-actuator' // For metrics, health, and tracing
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// Lombok for reducing boilerplate code
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// Spring Boot DevTools for development-time features (e.g., auto-restarts)
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// H2 Database for local file-based persistence
+	runtimeOnly 'com.h2database:h2'
+
+	// Dotenv for loading environment variables from .env file
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+
+	// Logstash Logback Encoder for structured (JSON) logging
+	implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+
+	// Micrometer Tracing with Brave bridge and Zipkin reporter for distributed tracing
+	implementation 'io.micrometer:micrometer-tracing-bridge-brave'
+	implementation 'io.zipkin.reporter2:zipkin-reporter-brave'
+
+	// JJWT (Java JWT) for generating and parsing JWTs
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+
+	// Testing Dependencies
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test' // For testing Spring Security
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher' // For JUnit 5 test platform
+
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
