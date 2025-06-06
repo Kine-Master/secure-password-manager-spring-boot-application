@@ -1,0 +1,184 @@
+Secure Password Manager Backend Spring Boot Application
+This repository contains the Spring Boot backend for the Secure Password Manager Web Application. It provides RESTful APIs for user authentication (local and OAuth2 with Google), authorization, and secure management of password entries.
+
+Table of Contents
+Technologies Used
+Prerequisites
+Getting Started
+Cloning the Repository
+Environment Configuration (.env or application.properties/yml)
+Database Setup
+Running the Backend
+Using Gradle
+Building and Running a JAR
+API Endpoints (Overview)
+Security Considerations
+Troubleshooting
+Contributing
+License
+1. Technologies Used
+Java: 17+
+Spring Boot: 3.3.x (or your specific version)
+Spring Security: For authentication and authorization.
+Spring Data JPA: For database interaction.
+JWT (JSON Web Tokens): For stateless authentication.
+H2 Database: (Default for development) In-memory database for local testing.
+Lombok: Reduces boilerplate code.
+Gradle: Build automation tool.
+2. Prerequisites
+Before you begin, ensure you have the following installed on your machine:
+
+Java Development Kit (JDK): Version 17 or higher.
+Download JDK
+Gradle: (Optional, as the project includes Gradle Wrapper)
+Install Gradle
+Git: For cloning the repository.
+Download Git
+3. Getting Started
+Cloning the Repository
+First, clone the backend repository to your local machine. If this backend is part of a larger monorepo, navigate into the password-manager-backend directory after cloning the parent.
+
+Bash
+
+git clone https://github.com/Kine-Master/secure-password-manager-web-app.git
+cd secure-password-manager-web-app/password-manager-backend
+Environment Configuration (.env or application.properties/yml)
+This backend requires several sensitive configurations that should NOT be committed directly into source control. It's recommended to manage these using environment variables or a local application.properties (or application.yml) file that is excluded by your .gitignore.
+
+Recommendation: Create a file named application-dev.properties (or application-dev.yml) in src/main/resources/ for development settings and ensure it's in your .gitignore to prevent accidental commits.
+
+Alternatively, you can set these as system environment variables.
+
+Example application-dev.properties:
+
+Properties
+
+# Server Port
+server.port=8080
+
+# JWT Configuration
+# A strong, unique secret key for signing JWTs.
+# GENERATE A NEW, LONG (e.g., 256-bit or 512-bit) RANDOM STRING FOR PRODUCTION.
+# Example: Use a tool like https://www.allkeysgenerator.com/ (select AES 256-bit or similar)
+application.security.jwt.secret-key=YOUR_VERY_LONG_AND_COMPLEX_JWT_SECRET_KEY_HERE_MINIMUM_32_CHARS
+
+# JWT Token Expiration in Milliseconds (e.g., 5 minutes = 300000)
+application.security.jwt.expiration=300000
+
+# JWT Refresh Token Expiration in Milliseconds (e.g., 7 days = 604800000)
+application.security.jwt.refresh-token.expiration=604800000
+
+# Google OAuth2 Configuration
+# You must obtain these from the Google Cloud Console (APIs & Services -> Credentials)
+# Create OAuth 2.0 Client IDs (Web application)
+spring.security.oauth2.client.registration.google.client-id=YOUR_GOOGLE_CLIENT_ID
+spring.security.oauth2.client.registration.google.client-secret=YOUR_GOOGLE_CLIENT_SECRET
+spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8080/oauth2/callback/google
+spring.security.oauth2.client.registration.google.scope=openid,profile,email
+
+# Database Configuration (H2 In-Memory for Development)
+# For production, you would configure PostgreSQL, MySQL, etc.
+spring.datasource.url=jdbc:h2:mem:password_manager_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+
+# JPA Configuration
+spring.jpa.hibernate.ddl-auto=update # Use 'update' for development, 'none' or 'validate' for production
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.H2Dialect
+
+# CORS Configuration (Adjust to your frontend's URL)
+cors.allowed-origins=http://localhost:5173,http://localhost:3000 # Add your frontend's URL here
+Important Notes:
+
+application.security.jwt.secret-key: This is CRITICAL. Never use a weak or default key in production. Generate a new, strong, random key.
+Google OAuth2 Credentials: You must create an OAuth 2.0 Web Application client ID in your Google Cloud Console.
+Add http://localhost:8080 to "Authorized JavaScript origins".
+Add http://localhost:8080/oauth2/callback/google to "Authorized redirect URIs".
+Database: The default is H2 in-memory, which is great for quick development and testing as data is lost on server restart. For persistent data, you'll need to configure an external database (e.g., PostgreSQL, MySQL).
+4. Database Setup
+By default, the backend uses an H2 in-memory database. No manual setup is required for development. The schema will be automatically generated by Hibernate when the application starts (spring.jpa.hibernate.ddl-auto=update).
+
+For production environments, you would change spring.datasource.url, username, password, and driverClassName to point to your external database server. You would also typically set spring.jpa.hibernate.ddl-auto=none or validate and manage migrations using a tool like Flyway or Liquibase.
+
+5. Running the Backend
+You can run the Spring Boot backend using the Gradle Wrapper or by building a JAR file.
+
+Using Gradle
+The easiest way to run the application during development:
+
+Open a terminal in the password-manager-backend directory.
+Clean and Build:
+Bash
+
+./gradlew clean build
+This compiles the code and resolves dependencies.
+Run the application:
+Bash
+
+./gradlew bootRun
+The application will start, usually on http://localhost:8080. You will see console output indicating that Tomcat has started.
+Building and Running a JAR
+For deploying the application or running it as a standalone executable:
+
+Open a terminal in the password-manager-backend directory.
+Build the executable JAR:
+Bash
+
+./gradlew clean build -x test
+The -x test flag skips running tests, which can speed up the build. The JAR file will be created in the build/libs directory (e.g., build/libs/secure-password-manager-app-0.0.1-SNAPSHOT.jar).
+Run the JAR file:
+Bash
+
+java -jar build/libs/secure-password-manager-app-0.0.1-SNAPSHOT.jar
+(Replace secure-password-manager-app-0.0.1-SNAPSHOT.jar with the actual name of your generated JAR file).
+6. API Endpoints (Overview)
+The backend exposes RESTful API endpoints for various functionalities. Here are some key categories:
+
+Authentication:
+POST /api/v1/auth/register: Register a new local user.
+POST /api/v1/auth/authenticate: Authenticate a local user and issue JWTs.
+POST /api/v1/auth/refresh-token: Obtain a new access token using a refresh token.
+GET /oauth2/authorize/google: Initiate Google OAuth2 login.
+GET /oauth2/callback/google: Google OAuth2 callback endpoint.
+User Management:
+GET /api/v1/users: (Admin only) Retrieve all users.
+GET /api/v1/users/{id}: (Admin/Self) Retrieve user by ID.
+PUT /api/v1/users/{id}: (Admin/Self) Update user details.
+DELETE /api/v1/users/{id}: (Admin only) Delete a user.
+Password Entries:
+POST /api/v1/entries: Create a new password entry.
+GET /api/v1/entries: Retrieve all password entries for the authenticated user.
+GET /api/v1/entries/{id}: Retrieve a specific password entry.
+PUT /api/v1/entries/{id}: Update a password entry.
+DELETE /api/v1/entries/{id}: Delete a password entry.
+(Note: Actual endpoints may vary based on your specific implementation. Refer to your controller files for exact paths and methods.)
+
+7. Security Considerations
+JWT Secret Key: Ensure application.security.jwt.secret-key is highly secure and never hardcoded in production. Use environment variables or a secure secret management solution.
+CORS: Adjust cors.allowed-origins to explicitly list your production frontend URL(s) when deploying. Avoid *.
+Database Credentials: For production, use strong, unique database credentials and avoid exposing them in your source code.
+Logging: In a production environment, ensure robust logging is in place and monitor logs for suspicious activity. Avoid logging sensitive data.
+Dependency Updates: Regularly update your project's dependencies to patch known vulnerabilities.
+8. Troubleshooting
+"Port 8080 already in use": Another application is using port 8080. You can either stop that application or change server.port in application-dev.properties to a different port (e.g., 8081).
+"JWT secret key not configured" / "Invalid JWT": Ensure your application.security.jwt.secret-key is correctly set and is long enough.
+"Access Denied" / "401 Unauthorized": Check your JWT token (is it expired?), ensure it's being sent with Authorization: Bearer <token> header, and verify your Spring Security configurations (@PreAuthorize annotations, security filter chain).
+Google OAuth2 Errors: Double-check your client-id, client-secret, and redirect-uri in application-dev.properties against your Google Cloud Console setup. Ensure the authorized redirect URIs match exactly.
+9. Contributing
+(Optional section - if this is an open-source project or for team collaboration)
+
+Contributions are welcome! Please follow these steps:
+
+Fork the repository.
+Create a new branch (git checkout -b feature/your-feature).
+Make your changes.
+Commit your changes (git commit -m 'Add new feature').
+Push to the branch (git push origin feature/your-feature).
+Create a Pull Request.
+10. License
+(Optional section - e.g., MIT, Apache 2.0, etc.)
+
+This project is licensed under the MIT License.
